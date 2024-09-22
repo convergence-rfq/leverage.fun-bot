@@ -1,15 +1,35 @@
+use app_context::AppContext;
 use axum::{
     http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
+use chrono::Utc;
+use mongodb::{
+    bson::{doc, Document},
+    Collection,
+};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+mod app_context;
 
 #[tokio::main]
 async fn main() {
     // initialize debug
     tracing_subscriber::fmt::init();
+    let app_context = AppContext::new().await.unwrap();
+    app_context.db_client.database("prod");
+    let database = app_context.db_client.database("sample_mflix");
+    let my_coll: Collection<Document> = database.collection("movies");
+    // Find a movie based on the title value
+    let my_movie = my_coll
+        .find_one(doc! { "title": "The Perils of Pauline" })
+        .await;
+    match my_movie {
+        Ok(_) => println!("Found a movie"),
+        Err(e) => println!("Error finding movie: {}", e),
+    }
 
     let app = Router::new()
         .route("/", get(root))
@@ -37,7 +57,7 @@ async fn create_trade(Json(payload): Json<CreateTrade>) -> (StatusCode, Json<Cre
             quantity: payload.quantity,
             price: payload.price,
             trade_type: payload.trade_type,
-            created_at: chrono::Utc::now().timestamp(),
+            created_at: Utc::now().timestamp(),
         }),
     )
 }
