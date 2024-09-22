@@ -1,16 +1,16 @@
 use app_context::AppContext;
 use axum::{
+    extract::State,
     http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
 use chrono::Utc;
 use mongodb::{
-    bson::{doc, Document},
+    bson::{doc, oid::ObjectId},
     Collection,
 };
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 mod app_context;
 
@@ -19,21 +19,10 @@ async fn main() {
     // initialize debug
     tracing_subscriber::fmt::init();
     let app_context = AppContext::new().await.unwrap();
-    app_context.db_client.database("prod");
-    let database = app_context.db_client.database("sample_mflix");
-    let my_coll: Collection<Document> = database.collection("movies");
-    // Find a movie based on the title value
-    let my_movie = my_coll
-        .find_one(doc! { "title": "The Perils of Pauline" })
-        .await;
-    match my_movie {
-        Ok(_) => println!("Found a movie"),
-        Err(e) => println!("Error finding movie: {}", e),
-    }
-
     let app = Router::new()
         .route("/", get(root))
-        .route("/trades", post(create_trade));
+        .route("/trades", post(create_trade))
+        .with_state(app_context);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
@@ -43,23 +32,33 @@ async fn root<'a>() -> Json<HealthResponse<'a>> {
     Json(HealthResponse { status: "Working" })
 }
 
-async fn create_trade(Json(payload): Json<CreateTrade>) -> (StatusCode, Json<CreateTradeResponse>) {
+#[axum::debug_handler]
+async fn create_trade(
+    State(app_context): State<AppContext>,
+    Json(payload): Json<CreateTrade>,
+) -> (StatusCode, Json<CreateTradeResponse>) {
     println!("Creating trade: {}", payload.scrip);
     println!("Quantity: {}", payload.quantity);
     println!("Price: {}", payload.price);
     println!("Trade type: {:?}", payload.trade_type);
 
-    (
-        StatusCode::CREATED,
-        Json(CreateTradeResponse {
-            id: Uuid::new_v4(),
-            scrip: payload.scrip,
-            quantity: payload.quantity,
-            price: payload.price,
-            trade_type: payload.trade_type,
-            created_at: Utc::now().timestamp(),
-        }),
-    )
+    let db = app_context.db_client.database("prod");
+    let collection: Collection<CreateTradeResponse> = db.collection("orders");
+
+    let create_trade_response = CreateTradeResponse {
+        id: ObjectId::new(),
+        scrip: payload.scrip,
+        quantity: payload.quantity,
+        price: payload.price,
+        trade_type: payload.trade_type,
+        created_at: Utc::now().timestamp(),
+        updated_at: Utc::now().timestamp(),
+    };
+
+    let trade = collection.insert_one(&create_trade_response).await.unwrap();
+    println!("Trade created: {}", trade.inserted_id);
+
+    (StatusCode::CREATED, Json(create_trade_response))
 }
 
 #[derive(Debug, Deserialize)]
@@ -78,12 +77,16 @@ enum TradeType {
 
 #[derive(Debug, Serialize)]
 struct CreateTradeResponse {
-    id: Uuid,
+    #[serde(rename = "_id")]
+    id: ObjectId,
     scrip: String,
     quantity: i32,
     price: f32,
     trade_type: TradeType,
+    #[serde(rename = "createdAt")]
     created_at: i64,
+    #[serde(rename = "updatedAt")]
+    updated_at: i64,
 }
 
 #[derive(Debug, Serialize)]

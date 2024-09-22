@@ -4,10 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = "0.7.6"
+axum = { version = "0.7.6", features = ["macros"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 dotenv = "0.15.0"
-futures = { version = "0.3.30", default-features = false, features = ["async-await"] }
+futures = { version = "0.3.30", default-features = false, features = [
+    "async-await",
+] }
 futures-util = "0.3.30"
 mongodb = "3.1.0"
 serde = { version = "1.0.210", features = ["derive"] }
