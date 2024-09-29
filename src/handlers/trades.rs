@@ -1,13 +1,13 @@
-use crate::context::AppContext;
+use crate::context::app_context::AppContext;
 use crate::models::{CreateTrade, CreateTradeResponse};
 use axum::{extract::State, http::StatusCode, Json};
 use chrono::Utc;
 use mongodb::bson::oid::ObjectId;
 use mongodb::Collection;
-
+use std::sync::Arc;
 #[axum::debug_handler]
 pub async fn create_trade(
-    State(app_context): State<AppContext>,
+    State(app_context): State<Arc<AppContext>>,
     Json(payload): Json<CreateTrade>,
 ) -> (StatusCode, Json<CreateTradeResponse>) {
     println!("Creating trade: {}", payload.scrip);

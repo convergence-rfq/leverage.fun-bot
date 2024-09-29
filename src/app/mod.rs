@@ -1,15 +1,15 @@
-use std::error::Error;
+#![allow(dead_code)]
+use std::{error::Error, sync::Arc};
 
 use crate::{context::AppContext, routes::build_routes};
 use axum::Router;
 pub struct App {
-    pub context: AppContext,
+    pub context: Arc<AppContext>,
     pub router: Router,
 }
 
 impl App {
-    pub async fn new() -> Self {
-        let app_context = AppContext::new().await.unwrap();
+    pub async fn new(app_context: Arc<AppContext>) -> Self {
         let router = build_routes(app_context.clone());
 
         App {

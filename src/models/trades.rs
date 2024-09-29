@@ -28,11 +28,3 @@ pub struct CreateTradeResponse {
     #[serde(rename = "updatedAt")]
     pub updated_at: i64,
 }
-/*
-{
-    "scrip": "SBIN",
-    "quantity": 100,
-    "price": 200,
-    "trade_type": "buy"
-}
-*/
