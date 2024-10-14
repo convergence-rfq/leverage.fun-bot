@@ -1,10 +1,12 @@
 use crate::context::app_context::AppContext;
-use crate::models::{CreateTrade, CreateTradeResponse};
+use crate::models::{CreateTrade, CreateTradeResponse, GetTradeResponse};
 use axum::{extract::State, http::StatusCode, Json};
 use chrono::Utc;
-use mongodb::bson::oid::ObjectId;
+use mongodb::bson::{doc, oid::ObjectId};
 use mongodb::Collection;
+use std::str::FromStr;
 use std::sync::Arc;
+
 #[axum::debug_handler]
 pub async fn create_trade(
     State(app_context): State<Arc<AppContext>>,
@@ -32,4 +34,22 @@ pub async fn create_trade(
     println!("Trade created: {}", trade.inserted_id);
 
     (StatusCode::CREATED, Json(create_trade_response))
+}
+
+#[axum::debug_handler]
+pub async fn get_trade(
+    State(app_context): State<Arc<AppContext>>,
+    id: String,
+) -> (StatusCode, Json<GetTradeResponse>) {
+    let db = app_context.db_client.database("prod");
+    let collection: Collection<GetTradeResponse> = db.collection("orders");
+
+    let trade = collection
+        .find(doc! {"_id": ObjectId::from_str(&id).unwrap()})
+        .await
+        .unwrap()
+        .deserialize_current()
+        .unwrap();
+
+    (StatusCode::OK, Json(trade))
 }

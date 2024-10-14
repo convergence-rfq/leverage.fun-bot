@@ -28,3 +28,17 @@ pub struct CreateTradeResponse {
     #[serde(rename = "updatedAt")]
     pub updated_at: i64,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GetTradeResponse {
+    #[serde(rename = "_id")]
+    pub id: ObjectId,
+    pub scrip: String,
+    pub quantity: i32,
+    pub price: f32,
+    pub trade_type: TradeType,
+    #[serde(rename = "createdAt")]
+    pub created_at: i64,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: i64,
+}
