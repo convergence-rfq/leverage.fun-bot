@@ -3,8 +3,10 @@ use std::sync::Arc;
 use context::AppContext;
 mod app;
 mod context;
+mod errors;
 mod handlers;
 mod models;
+mod pdas;
 mod routes;
 
 #[tokio::main]

@@ -9,7 +9,7 @@ pub enum AppContextError {
     ConnectionError(String),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AppContext {
     pub db_client: Client,
 }
