@@ -22,6 +22,7 @@ impl From<u8> for OptionTypeV2 {
 }
 
 #[derive(Debug, AnchorSerialize, AnchorDeserialize, PartialEq, Eq, Clone, Copy)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum CollateralType {
     STABLE = 0,
     UNDERLYING = 1,
