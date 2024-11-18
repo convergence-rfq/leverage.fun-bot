@@ -8,6 +8,7 @@ mod handlers;
 mod models;
 mod pdas;
 mod routes;
+mod utils;
 
 #[tokio::main]
 async fn main() {
