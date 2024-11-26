@@ -1,3 +1,4 @@
+#![allow(unused)]
 use dotenv::dotenv;
 use mongodb::Client;
 use solana_sdk::signature::Keypair;
@@ -33,9 +34,9 @@ impl AppContext {
 
         Ok(Self {
             db_client: client,
-            admin_keypair: admin_keypair,
-            telegram_bot_token: telegram_bot_token,
-            telegram_channel_id: telegram_channel_id,
+            admin_keypair,
+            telegram_bot_token,
+            telegram_channel_id,
         })
     }
 }
