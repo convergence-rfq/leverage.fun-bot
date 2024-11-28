@@ -6,7 +6,13 @@ import router from './routes/mintOptions.route.js';
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['*'],
+  }),
+);
 app.use(express.json());
 
 try {
