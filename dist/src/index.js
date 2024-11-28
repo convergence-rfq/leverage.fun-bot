@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import Config from './config.js';
+import router from './routes/mintOptions.route.js';
 const app = express();
 app.use(cors());
 app.use(helmet());
@@ -16,6 +17,7 @@ try {
         console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ${res.statusCode} ${req.ip}`);
         next();
     });
+    app.use('/mint-options', router);
 } catch (error) {
     console.error('Error connecting to database: ', error);
 } finally{

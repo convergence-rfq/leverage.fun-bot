@@ -16,10 +16,10 @@ class Config {
 
   ENV = process.env.NODE_ENV;
   MONGO_URI =
-    this.ENV === 'dev'
+    this.ENV === 'development'
       ? `${process.env.MONGO_URI_DEV}/local`
       : `${process.env.MONGO_URI_PROD}/prod`;
-  PORT = 8000;
+  PORT = process.env.PORT ?? 8080;
   TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
   TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID;
   ADMIN_KEYPAIR = Keypair.fromSecretKey(

@@ -1,0 +1,46 @@
+name: Deploy to AWS Elastic Beanstalk
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Generate deployment package
+        run: |
+          zip -r deploy.zip . \
+          -x "*.git*" \
+          -x "src/*" \
+          -x "node_modules/*" \
+          && cd node_modules \
+          && zip -r ../deploy.zip . \
+          && cd ..
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: leveragefunbot
+          environment_name: Leveragefunbot-env-1
+          version_label: ${{ github.sha }}
+          region: ${{ secrets.AWS_REGION }}
+          deployment_package: deploy.zip

@@ -1,7 +1,7 @@
-import { startMintingOptions } from '../controllers/mintOptions.controller';
+import { startMintingOptions } from '../controllers/mintOptions.controller.js';
 import { Router } from 'express';
 const router = Router();
-router.post('/mint-options', startMintingOptions);
+router.post('/', startMintingOptions);
 export default router;
 
 //# sourceMappingURL=mintOptions.route.js.map

@@ -8,7 +8,31 @@ import router from './routes/mintOptions.route.js';
 const app = express();
 
 app.use(cors());
-app.use(helmet());
+app.use(
+  helmet({
+    hidePoweredBy: true,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
+    },
+    crossOriginEmbedderPolicy: true,
+    crossOriginOpenerPolicy: true,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+    frameguard: {
+      action: 'deny',
+    },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  }),
+);
 app.use(express.json());
 
 try {
