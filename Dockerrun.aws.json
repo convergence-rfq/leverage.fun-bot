@@ -1,5 +1,9 @@
 {
   "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "333356345985.dkr.ecr.ap-south-1.amazonaws.com/leveragefunbot:latest",
+    "Update": "true"
+  },
   "Ports": [
     {
       "ContainerPort": 8080,
