@@ -1,11 +1,22 @@
 FROM node:20-alpine
 
-RUN apk add --no-cache curl bash
+# Install dependencies required for Solana CLI
+RUN apk add --no-cache \
+    curl \
+    bash \
+    build-base \
+    gcc \
+    python3 \
+    libtool \
+    automake \
+    autoconf \
+    make \
+    g++
 
 WORKDIR /app
 
-RUN sh -c "$(curl -sSfL https://release.anza.xyz/edge/install)"
-ENV PATH="/root/.local/share/solana/install/active_release/bin:$PATH"
+# RUN sh -c "$(curl -sSfL https://release.anza.xyz/edge/install)"
+# ENV PATH="/root/.local/share/solana/install/active_release/bin:$PATH"
 
 RUN mkdir -p /root/.config/solana
 
