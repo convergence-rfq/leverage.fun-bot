@@ -1,18 +1,5 @@
 FROM node:20-alpine
 
-# Install dependencies required for Solana CLI
-RUN apk add --no-cache \
-    curl \
-    bash \
-    build-base \
-    gcc \
-    python3 \
-    libtool \
-    automake \
-    autoconf \
-    make \
-    g++
-
 WORKDIR /app
 
 # RUN sh -c "$(curl -sSfL https://release.anza.xyz/edge/install)"
@@ -20,8 +7,7 @@ WORKDIR /app
 
 RUN mkdir -p /root/.config/solana
 
-ARG SOLANA_PRIVATE_KEY
-RUN echo "${SOLANA_PRIVATE_KEY}" > /root/.config/solana/5kRot8UnMEqoDkAc72e7pqaEaF5hxGmbDNowMmPiCDmb.json && \
+RUN echo "${ADMIN_KEYPAIR}" > /root/.config/solana/5kRot8UnMEqoDkAc72e7pqaEaF5hxGmbDNowMmPiCDmb.json && \
     chmod 600 /root/.config/solana/5kRot8UnMEqoDkAc72e7pqaEaF5hxGmbDNowMmPiCDmb.json
 
 RUN npm install -g pnpm
