@@ -7,6 +7,7 @@ WORKDIR /app
 
 RUN mkdir -p /root/.config/solana
 
+ARG ADMIN_KEYPAIR
 RUN echo "${ADMIN_KEYPAIR}" > /root/.config/solana/5kRot8UnMEqoDkAc72e7pqaEaF5hxGmbDNowMmPiCDmb.json && \
     chmod 600 /root/.config/solana/5kRot8UnMEqoDkAc72e7pqaEaF5hxGmbDNowMmPiCDmb.json
 
