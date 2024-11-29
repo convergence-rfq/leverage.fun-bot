@@ -1,4 +1,4 @@
-FROM 333356345985.dkr.ecr.ap-south-1.amazonaws.com/leveragefunbot:latest
+FROM node:20-alpine
 
 WORKDIR /app
 
