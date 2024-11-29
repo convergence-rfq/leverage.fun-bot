@@ -2,8 +2,7 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# RUN sh -c "$(curl -sSfL https://release.anza.xyz/edge/install)"
-# ENV PATH="/root/.local/share/solana/install/active_release/bin:$PATH"
+RUN apk add --no-cache python3 make g++ gcc
 
 RUN npm install -g pnpm
 
