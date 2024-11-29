@@ -13,29 +13,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20.x'
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Build
-        run: npm run build
-
       - name: Generate deployment package
         run: |
           zip -r deploy.zip . \
           -x "*.git*" \
           -x "dist/*" \
-          -x "node_modules/*" \
-          && cd node_modules \
-          && zip -r ../deploy.zip . \
-          && cd ..
+          -x "node_modules/*"
 
       - name: Deploy to EB
-        uses: einaregilsson/beanstalk-deploy@v21
+        uses: einaregilsson/beanstalk-deploy@v22
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
