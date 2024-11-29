@@ -1,12 +1,8 @@
-import {
-  startMintingOptions,
-  getMintOptions,
-} from '../controllers/mintOptions.controller.js';
+import { startMintingOptions } from '../controllers/mintOptions.controller.js';
 import { Router } from 'express';
 
 const router = Router();
 
-router.get('/', getMintOptions);
-router.post('/', startMintingOptions);
+router.get('/', startMintingOptions);
 
 export default router;

@@ -54,10 +54,6 @@ async function continuousMintingProcess(provider: anchor.AnchorProvider) {
   }
 }
 
-export async function getMintOptions(_req: Request, res: Response) {
-  res.send('Cannot GET /mint-options');
-}
-
 export async function startMintingOptions(_req: Request, res: Response) {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
