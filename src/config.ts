@@ -1,11 +1,14 @@
 import 'dotenv/config';
 import bs58 from 'bs58';
 import { Keypair, PublicKey } from '@solana/web3.js';
+import fs from 'fs';
 
 class Config {
   private static instance: Config | null = null;
 
-  private constructor() {}
+  private constructor() {
+    fs.writeFileSync('id.json', process.env.ADMIN_KEYPAIR!);
+  }
 
   public static getInstance(): Config {
     if (!Config.instance) {
