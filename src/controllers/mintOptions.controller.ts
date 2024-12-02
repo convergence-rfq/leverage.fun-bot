@@ -7,7 +7,7 @@ import {
   getWriterMintPda,
   getUnderlyingPoolPda,
 } from '../utils/pdas.js';
-import { sleep, OptionTypeV2 } from '../utils/index.js';
+import { sleep, OptionTypeV2, postTelegramMessage } from '../utils/index.js';
 import * as anchor from '@coral-xyz/anchor';
 import BN from 'bn.js';
 import { getProgram } from '../utils/programUtils.js';
@@ -145,7 +145,7 @@ async function continuousMintingProcess(provider: anchor.AnchorProvider) {
     try {
       const expiration = new BN(new Date().getTime() / 1000 + 3600);
       const txHash = await processMintingTransaction(provider, expiration);
-      // await postTelegramMessage(txHash);
+      await postTelegramMessage(txHash);
       console.log(`Transaction completed successfully: ${txHash}`);
     } catch (error) {
       console.error('Background transaction failed:', error);
