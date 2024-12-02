@@ -37,6 +37,9 @@ class Config {
   TESTNET_WETH_MINT = new PublicKey(
     'EthE8omBLMAmj63ca8p2VdZNfUzbi93gJmE2a2663PdN',
   );
+  TESTNET_WETH_POOL = new PublicKey(
+    'J6QSQw6bpF7PAADTJcoNxNFy8akWjrCHc4bxt2tmW3C5',
+  );
   TESTNET_SOL_MINT = new PublicKey(
     'SoLcvuLp7S3wBXqoYDtqjnP9LpTdQb4nKXUG3GokYor',
   );
@@ -46,6 +49,8 @@ class Config {
   TESTNET_ORACLE_PUBLIC_KEY = new PublicKey(
     '7aX1P1mNsPPjFbRmhTvthNh8ujtCgoc8keq8qcze1LN6',
   );
+
+  TESTNET_RPC_URL = 'https://testnet.dev2.eclipsenetwork.xyz';
 
   jsonToBs58(json: Array<number>) {
     return bs58.encode(json);
