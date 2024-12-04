@@ -17,7 +17,7 @@ import {
 
 export { pdas, programUtils };
 
-const connection = new Connection(Config.TESTNET_RPC_URL);
+const connection = new Connection(Config.TESTNET_RPC_URL, 'confirmed');
 
 export enum OptionTypeV2 {
   CALL = 0,
@@ -72,6 +72,10 @@ export async function getAtaForUser(
       underlyingMint,
       accountOwner,
     );
+
+    console.log('optionMintAta:', optionMintAta.toBase58());
+    console.log('writerMintAta:', writerMintAta.toBase58());
+    console.log('underlyingMintAta:', underlyingMintAta.toBase58());
 
     // Check if accounts exist first
     const accounts = await connection.getMultipleAccountsInfo([
