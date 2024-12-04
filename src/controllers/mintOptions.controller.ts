@@ -7,7 +7,12 @@ import {
   getWriterMintPda,
   getUnderlyingPoolPda,
 } from '../utils/pdas.js';
-import { sleep, OptionTypeV2, postTelegramMessage } from '../utils/index.js';
+import {
+  sleep,
+  OptionTypeV2,
+  postTelegramMessage,
+  getAtaForUser,
+} from '../utils/index.js';
 import * as anchor from '@coral-xyz/anchor';
 import BN from 'bn.js';
 import { getProgram } from '../utils/programUtils.js';
@@ -104,39 +109,38 @@ async function processMintingTransaction(
     tx.add(createEuroMetaV2Instruction);
     const sig = await provider.sendAndConfirm(tx);
     console.log(`Euro meta created: ${sig}`);
-    // sleep(5000);
-    return sig;
+    sleep(5000);
   }
-  // const wholeContracts = 2.5;
-  // const size = new BN(Math.pow(10, 4)).muln(wholeContracts);
-  // const atas = await getAtaForUser(
-  //   euroMeta.optionMint,
-  //   euroMeta.writerMint,
-  //   euroMeta.underlyingMint,
-  //   provider.publicKey,
-  // );
-  // if (!atas) {
-  //   throw new Error('Failed to get ATAs');
-  // }
-  // const mintOptionInstruction = await program.methods
-  //   .mintOptionsV2(size, OptionTypeV2.CALL)
-  //   .accounts({
-  //     payer: provider.publicKey,
-  //     euroMeta: euroMetaKey,
-  //     collateralPool: underlyingPool,
-  //     optionMint: euroMeta.optionMint,
-  //     writerMint: euroMeta.writerMint,
-  //     minterCollateral: atas.underlyingMintAta,
-  //     optionDestination: atas.optionMintAta,
-  //     writerDestination: atas.writerMintAta,
-  //     tokenProgram: TOKEN_PROGRAM_ID,
-  //   })
-  //   .signers([Config.ADMIN_KEYPAIR])
-  //   .instruction();
-  // {
-  //   const tx = new Transaction().add(mintOptionInstruction);
-  //   return await provider.sendAndConfirm(tx);
-  // }
+  const wholeContracts = 2.5;
+  const size = new BN(Math.pow(10, 4)).muln(wholeContracts);
+  const atas = await getAtaForUser(
+    euroMeta.optionMint,
+    euroMeta.writerMint,
+    euroMeta.underlyingMint,
+    provider.publicKey,
+  );
+  if (!atas) {
+    throw new Error('Failed to get ATAs');
+  }
+  const mintOptionInstruction = await program.methods
+    .mintOptionsV2(size, OptionTypeV2.CALL)
+    .accounts({
+      payer: provider.publicKey,
+      euroMeta: euroMetaKey,
+      collateralPool: underlyingPool,
+      optionMint: euroMeta.optionMint,
+      writerMint: euroMeta.writerMint,
+      minterCollateral: atas.underlyingMintAta,
+      optionDestination: atas.optionMintAta,
+      writerDestination: atas.writerMintAta,
+      tokenProgram: TOKEN_PROGRAM_ID,
+    })
+    .signers([Config.ADMIN_KEYPAIR])
+    .instruction();
+  {
+    const tx = new Transaction().add(mintOptionInstruction);
+    return await provider.sendAndConfirm(tx);
+  }
 }
 
 async function continuousMintingProcess(provider: anchor.AnchorProvider) {
@@ -145,8 +149,10 @@ async function continuousMintingProcess(provider: anchor.AnchorProvider) {
     try {
       const expiration = new BN(new Date().getTime() / 1000 + 3600);
       const txHash = await processMintingTransaction(provider, expiration);
-      await postTelegramMessage(txHash);
-      console.log(`Transaction completed successfully: ${txHash}`);
+      if (txHash) {
+        await postTelegramMessage(txHash);
+        console.log(`Transaction completed successfully: ${txHash}`);
+      }
     } catch (error) {
       console.error('Background transaction failed:', error);
     }
