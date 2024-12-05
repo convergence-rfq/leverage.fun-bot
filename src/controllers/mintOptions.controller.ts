@@ -18,6 +18,7 @@ import BN from 'bn.js';
 import { getProgram } from '../utils/programUtils.js';
 import { TOKEN_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token.js';
 import { Transaction } from '@solana/web3.js';
+import cron from 'node-cron';
 
 async function processMintingTransaction(
   provider: anchor.AnchorProvider,
@@ -143,9 +144,8 @@ async function processMintingTransaction(
   }
 }
 
-async function continuousMintingProcess(provider: anchor.AnchorProvider) {
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
+export async function scheduleMintingProcess(provider: anchor.AnchorProvider) {
+  cron.schedule('30 * * * *', async () => {
     try {
       const expiration = new BN(new Date().getTime() / 1000 + 3600);
       const txHash = await processMintingTransaction(provider, expiration);
@@ -154,23 +154,21 @@ async function continuousMintingProcess(provider: anchor.AnchorProvider) {
         console.log(`Transaction completed successfully: ${txHash}`);
       }
     } catch (error) {
-      console.error('Background transaction failed:', error);
+      console.error('Scheduled transaction failed:', error);
     }
-
-    await sleep(3600000);
-  }
+  });
 }
 
 export async function startMintingOptions(_req: Request, res: Response) {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  continuousMintingProcess(provider).catch(error => {
-    console.error('Continuous processing failed:', error);
+  scheduleMintingProcess(provider).catch(error => {
+    console.error('Failed to start cron job:', error);
   });
 
   res.status(202).json({
-    message: 'Minting options started',
+    message: 'Minting options cron job started',
     status: 'pending',
   });
 }
