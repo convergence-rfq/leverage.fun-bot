@@ -28,6 +28,9 @@ class Config {
   ADMIN_KEYPAIR = Keypair.fromSecretKey(
     new Uint8Array(JSON.parse(process.env.ADMIN_KEYPAIR!)),
   );
+  HONEYBADGER_API_KEY = process.env.HONEYBADGER_API_KEY;
+
+  // Program IDs
   LEVERAGE_FUN_PROGRAM_ID = new PublicKey(
     'LfunVKmPLfejpbCXPnrLbjZr693RrgKHdQub2ge1ZC9',
   );

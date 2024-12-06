@@ -3,8 +3,14 @@ import express from 'express';
 import cors from 'cors';
 import Config from './config.js';
 import router from './routes/mintOptions.route.js';
+import Honeybadger from '@honeybadger-io/js';
 
 const app = express();
+
+Honeybadger.configure({
+  apiKey: Config.HONEYBADGER_API_KEY,
+  environment: 'production',
+});
 
 app.use(
   cors({
@@ -14,6 +20,7 @@ app.use(
   }),
 );
 app.use(express.json());
+app.use(Honeybadger.errorHandler);
 
 try {
   await mongoose.connect(`${Config.MONGO_URI}`);
