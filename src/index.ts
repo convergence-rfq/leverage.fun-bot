@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import Config from './config.js';
 import router from './routes/mintOptions.route.js';
+import healthRouter from './routes/health.route.js';
 import Honeybadger from '@honeybadger-io/js';
 
 const app = express();
@@ -36,6 +37,7 @@ try {
     next();
   });
   app.use('/mint-options', router);
+  app.use('/health', healthRouter);
 } catch (error) {
   console.error('Error connecting to database: ', error);
 } finally {
