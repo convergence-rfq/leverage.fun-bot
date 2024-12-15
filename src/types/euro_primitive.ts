@@ -710,6 +710,14 @@ export type EuroPrimitive = {
           "writable": true
         },
         {
+          "name": "vaultCollateral",
+          "writable": true
+        },
+        {
+          "name": "vaultAuthority",
+          "writable": true
+        },
+        {
           "name": "optionDestination",
           "writable": true
         },

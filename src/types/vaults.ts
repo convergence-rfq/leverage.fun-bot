@@ -175,6 +175,129 @@ export type Vaults = {
       "args": []
     },
     {
+      "name": "startCycle",
+      "discriminator": [
+        203,
+        152,
+        115,
+        167,
+        17,
+        252,
+        73,
+        86
+      ],
+      "accounts": [
+        {
+          "name": "vaultAuthority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "optionCycle",
+          "writable": true
+        },
+        {
+          "name": "vaultOptionTokenAccount",
+          "docs": [
+            "The vault's token account that will receive the minted options"
+          ],
+          "writable": true
+        },
+        {
+          "name": "vaultWriterTokenAccount",
+          "docs": [
+            "The vault's token account that will receive the writer tokens"
+          ],
+          "writable": true
+        },
+        {
+          "name": "collateralPool",
+          "writable": true
+        },
+        {
+          "name": "underlyingPool",
+          "docs": [
+            "this underlying pool is of the defi option vaults program, not leverage.fun engine"
+          ],
+          "writable": true
+        },
+        {
+          "name": "vaultCollateral",
+          "writable": true
+        },
+        {
+          "name": "vaultPoolAuthority",
+          "writable": true
+        },
+        {
+          "name": "euroMeta",
+          "writable": true
+        },
+        {
+          "name": "optionMint",
+          "writable": true
+        },
+        {
+          "name": "writerMint",
+          "writable": true
+        },
+        {
+          "name": "auctionState",
+          "writable": true
+        },
+        {
+          "name": "euroPrimitiveProgram",
+          "docs": [
+            "Euro primitive program for minting options"
+          ]
+        },
+        {
+          "name": "systemProgram"
+        },
+        {
+          "name": "tokenProgram"
+        }
+      ],
+      "args": [
+        {
+          "name": "cycleNumber",
+          "type": "u64"
+        },
+        {
+          "name": "strikePrice",
+          "type": "u64"
+        },
+        {
+          "name": "underlyingAmountPerContract",
+          "type": "u64"
+        },
+        {
+          "name": "optionAmount",
+          "type": "u64"
+        },
+        {
+          "name": "priceDecimals",
+          "type": "u8"
+        },
+        {
+          "name": "optionType",
+          "type": "u8"
+        },
+        {
+          "name": "auctionType",
+          "type": "u8"
+        },
+        {
+          "name": "startingBid",
+          "type": "u64"
+        },
+        {
+          "name": "duration",
+          "type": "i64"
+        }
+      ]
+    },
+    {
       "name": "withdraw",
       "discriminator": [
         183,
@@ -250,6 +373,19 @@ export type Vaults = {
   ],
   "accounts": [
     {
+      "name": "auction",
+      "discriminator": [
+        218,
+        94,
+        247,
+        242,
+        126,
+        233,
+        131,
+        81
+      ]
+    },
+    {
       "name": "coveredCallBaseVault",
       "discriminator": [
         138,
@@ -260,6 +396,32 @@ export type Vaults = {
         116,
         53,
         30
+      ]
+    },
+    {
+      "name": "euroMetaV2",
+      "discriminator": [
+        235,
+        100,
+        34,
+        74,
+        90,
+        205,
+        244,
+        43
+      ]
+    },
+    {
+      "name": "optionCycle",
+      "discriminator": [
+        57,
+        38,
+        196,
+        146,
+        11,
+        164,
+        132,
+        183
       ]
     }
   ],
@@ -301,6 +463,88 @@ export type Vaults = {
     }
   ],
   "types": [
+    {
+      "name": "auction",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "auctionType",
+            "type": {
+              "defined": {
+                "name": "auctionType"
+              }
+            }
+          },
+          {
+            "name": "startingBid",
+            "type": "u64"
+          },
+          {
+            "name": "duration",
+            "type": "i64"
+          },
+          {
+            "name": "startTime",
+            "type": "i64"
+          },
+          {
+            "name": "highestBid",
+            "type": "u64"
+          },
+          {
+            "name": "highestBidder",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "isActive",
+            "type": "bool"
+          },
+          {
+            "name": "tokenMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "assetHolder",
+            "type": "pubkey"
+          },
+          {
+            "name": "vaultBump",
+            "type": "u8"
+          },
+          {
+            "name": "auctionBump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "auctionType",
+      "repr": {
+        "kind": "rust"
+      },
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "english"
+          },
+          {
+            "name": "dutch"
+          },
+          {
+            "name": "sealedBid"
+          }
+        ]
+      }
+    },
     {
       "name": "coveredCallBaseVault",
       "serialization": "bytemuck",
@@ -455,6 +699,223 @@ export type Vaults = {
               "The SPL token account holding premiums collected from selling options"
             ],
             "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "euroMetaV2",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "underlyingMint",
+            "docs": [
+              "The mint of the underlying asset"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "stableMint",
+            "docs": [
+              "The mint key for some stable coin. Oracle should use this token for pricing. Use of a",
+              "different token is not recommended (e.g. USDT when Oracle uses USDT), as prices may deviate",
+              "slightly even for stablecoins."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "collateralPool",
+            "docs": [
+              "The collateral pool's address.",
+              "",
+              "The token held in the pool depends on the collateral type in use: PUTs and PUT spreads",
+              "use the stable asset, CALLs and CALL spreads use underlying. Some CALL Spreads can also",
+              "use stable. For example, a SOL call spread market may trade in SOL, or USDC."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "oracle",
+            "docs": [
+              "Oracle's address. Chainlink and Pyth oracles are supported at this time. Matches",
+              "ExpirationData's oracle"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "writerMint",
+            "docs": [
+              "The mint for the writer tokens, initialized on creation"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "optionMint",
+            "docs": [
+              "The mint for the option tokens, initialized on creation"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "expirationData",
+            "docs": [
+              "The address for the associated ExpirationData. Stored to make validations computationally",
+              "efficient."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "strikePrices",
+            "docs": [
+              "Strike price(s). For Calls/Puts, a single value. For vertical spreads, two values. The",
+              "lower strike price is first, followed by the higher price. Uses price_decimals"
+            ],
+            "type": {
+              "vec": "u64"
+            }
+          },
+          {
+            "name": "expiration",
+            "docs": [
+              "The Unix Timestamp for the expiration, in seconds. Must match ExpirationData's"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "underlyingAmountPerContract",
+            "docs": [
+              "The amount of underlying assets per 1 OptionToken,",
+              "denoted in the underlying assets decimals."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "underlyingDecimals",
+            "docs": [
+              "The number of decimals on the underlying, read from the mint on creation"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "stableDecimals",
+            "docs": [
+              "The decimals of the stable mint, read from the mint on creation."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "priceDecimals",
+            "docs": [
+              "The number of decimals in the strike_prices & price_at_expiration. This is",
+              "required to normalize the strike price with oracles."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "bumpSeed",
+            "docs": [
+              "The bump seed for the EuroMeta"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "oracleProviderId",
+            "docs": [
+              "An oracle provider identifier. Pyth = 0, Switchboard = 1"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "optionType",
+            "docs": [
+              "Option type of the euro meta: CALL, PUT, LongCallSpread, LongPutSpread"
+            ],
+            "type": {
+              "defined": {
+                "name": "optionTypeV2"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "optionCycle",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "startTimestamp",
+            "type": "i64"
+          },
+          {
+            "name": "endTimestamp",
+            "type": "i64"
+          },
+          {
+            "name": "isActive",
+            "type": "bool"
+          },
+          {
+            "name": "optionMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "auctionState",
+            "type": "pubkey"
+          },
+          {
+            "name": "vaultAuthority",
+            "type": "pubkey"
+          },
+          {
+            "name": "cycleNumber",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "strikePrice",
+            "type": "u64"
+          },
+          {
+            "name": "underlyingAmountPerContract",
+            "type": "u64"
+          },
+          {
+            "name": "priceDecimals",
+            "type": "u8"
+          },
+          {
+            "name": "euroMeta",
+            "type": "pubkey"
+          },
+          {
+            "name": "optionType",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "optionTypeV2",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "call"
+          },
+          {
+            "name": "put"
+          },
+          {
+            "name": "longCallSpread"
+          },
+          {
+            "name": "longPutSpread"
           }
         ]
       }
