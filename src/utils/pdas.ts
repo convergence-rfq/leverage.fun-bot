@@ -78,3 +78,43 @@ export function getPoolAuthorityPda() {
     Config.LEVERAGE_FUN_PROGRAM_ID,
   );
 }
+
+export function getOptionCyclePda(vaultAuthority: PublicKey, cycleNumber: BN) {
+  const textEncoder = new TextEncoder();
+  return PublicKey.findProgramAddressSync(
+    [
+      textEncoder.encode('option_cycle'),
+      vaultAuthority.toBuffer(),
+      cycleNumber.toArrayLike(Buffer, 'le', 8),
+    ],
+    Config.VAULTS_PROGRAM_ID,
+  );
+}
+
+export function getAuctionProgramVaultPda(auction: PublicKey) {
+  const textEncoder = new TextEncoder();
+  return PublicKey.findProgramAddressSync(
+    [textEncoder.encode('vault'), auction.toBuffer()],
+    Config.AUCTION_PROGRAM_ID,
+  );
+}
+
+export function getAuctionStatePda(creator: PublicKey, cycleNumber: BN) {
+  const textEncoder = new TextEncoder();
+  return PublicKey.findProgramAddressSync(
+    [
+      textEncoder.encode('auction'),
+      creator.toBuffer(),
+      cycleNumber.toArrayLike(Buffer, 'le', 8),
+    ],
+    Config.AUCTION_PROGRAM_ID,
+  );
+}
+
+export function getPoolAuthorityVaultsPda() {
+  const textEncoder = new TextEncoder();
+  return PublicKey.findProgramAddressSync(
+    [textEncoder.encode('pool_authority')],
+    Config.VAULTS_PROGRAM_ID,
+  );
+}
