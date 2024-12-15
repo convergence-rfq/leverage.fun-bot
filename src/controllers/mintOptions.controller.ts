@@ -6,25 +6,37 @@ import {
   getOptionMintPda,
   getWriterMintPda,
   getUnderlyingPoolPda,
+  getOptionCyclePda,
+  getAuctionProgramVaultPda,
+  getAuctionStatePda,
+  getPoolAuthorityVaultsPda,
 } from '../utils/pdas.js';
 import {
   sleep,
   OptionTypeV2,
-  postTelegramMessage,
+  // postTelegramMessage,
   getAtaForUser,
 } from '../utils/index.js';
 import * as anchor from '@coral-xyz/anchor';
 import BN from 'bn.js';
-import { getProgram } from '../utils/programUtils.js';
+import {
+  getProgram,
+  getVaultsProgram,
+  getAuctionProgram,
+} from '../utils/programUtils.js';
 import { TOKEN_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token.js';
 import { Transaction } from '@solana/web3.js';
+import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import cron from 'node-cron';
 
 async function processMintingTransaction(
   provider: anchor.AnchorProvider,
   expiration: BN,
+  cycleNumber: BN,
 ): Promise<string> {
   const program = await getProgram(provider);
+  const vaultsProgram = await getVaultsProgram(provider);
+  const auctionProgram = await getAuctionProgram(provider);
   const priceDecimals = 2;
   const [expirationData, expirationDataBump] = getExpirationDataPda(
     Config.TESTNET_WETH_MINT,
@@ -123,35 +135,103 @@ async function processMintingTransaction(
   if (!atas) {
     throw new Error('Failed to get ATAs');
   }
-  const mintOptionInstruction = await program.methods
-    .mintOptionsV2(size, OptionTypeV2.CALL)
+  const strikePrice = new BN(269);
+  const optionType = OptionTypeV2.CALL;
+  const auctionType = 0;
+  const startingBid = new BN(1_000_000);
+  const duration = new BN(604_800);
+
+  const [optionCycle] = getOptionCyclePda(provider.publicKey, cycleNumber);
+  const [auctionState] = getAuctionStatePda(provider.publicKey, cycleNumber);
+  const [auctionProgramVault] = getAuctionProgramVaultPda(auctionState);
+  console.log('Getting auction program ATAs');
+  const auctionProgramAtas = await getAtaForUser(
+    euroMeta.optionMint,
+    euroMeta.writerMint,
+    euroMeta.underlyingMint,
+    auctionProgramVault,
+    true,
+  );
+  if (!auctionProgramAtas) {
+    throw new Error('Failed to get auction program ATAs');
+  }
+  const [poolAuthorityVaults] = getPoolAuthorityVaultsPda();
+  const vaultUnderlyingAta = getAssociatedTokenAddressSync(
+    euroMeta.underlyingMint,
+    poolAuthorityVaults,
+    true,
+  );
+  // const vaultStableAta = getAssociatedTokenAddressSync(
+  //   euroMeta.stableMint,
+  //   poolAuthorityVaults,
+  //   true,
+  // );
+  const mintOptionInstruction = await vaultsProgram.methods
+    .startCycle(
+      cycleNumber,
+      strikePrice,
+      underlyingAmountPerContract,
+      size,
+      priceDecimals,
+      optionType,
+      auctionType,
+      startingBid,
+      duration,
+    )
     .accounts({
-      payer: provider.publicKey,
+      vaultAuthority: provider.publicKey,
+      optionCycle,
+      vaultOptionTokenAccount: auctionProgramAtas.optionMintAta,
+      vaultWriterTokenAccount: auctionProgramAtas.writerMintAta,
+      collateralPool: euroMeta.collateralPool,
+      underlyingPool: atas.underlyingMintAta,
+      vaultCollateral: vaultUnderlyingAta,
+      vaultPoolAuthority: poolAuthorityVaults,
       euroMeta: euroMetaKey,
-      collateralPool: underlyingPool,
       optionMint: euroMeta.optionMint,
       writerMint: euroMeta.writerMint,
-      minterCollateral: atas.underlyingMintAta,
-      optionDestination: atas.optionMintAta,
-      writerDestination: atas.writerMintAta,
+      auctionState,
+      euroPrimitiveProgram: Config.LEVERAGE_FUN_PROGRAM_ID,
       tokenProgram: TOKEN_PROGRAM_ID,
+      systemProgram: anchor.web3.SystemProgram.programId,
     })
-    .signers([Config.ADMIN_KEYPAIR])
+    .instruction();
+
+  const initAuctionIx = await auctionProgram.methods
+    .initializeAuction(cycleNumber, auctionType, startingBid, duration)
+    .accounts({
+      auction: auctionState,
+      creator: provider.publicKey,
+      tokenMint: euroMeta.optionMint,
+      assetHolder: auctionProgramAtas.optionMintAta,
+      vault: auctionProgramVault,
+      creatorTokenAccount: atas.optionMintAta,
+      systemProgram: anchor.web3.SystemProgram.programId,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+    })
     .instruction();
   {
-    const tx = new Transaction().add(mintOptionInstruction);
+    const tx = new Transaction().add(initAuctionIx).add(mintOptionInstruction);
     return await provider.sendAndConfirm(tx);
   }
 }
 
 export async function scheduleMintingProcess(provider: anchor.AnchorProvider) {
-  cron.schedule('30 * * * *', async () => {
+  let cycleNumber = new BN(4);
+  console.log('Current cycle number, ', cycleNumber.toString());
+  cron.schedule('0 0 * * 5', async () => {
     try {
       const expiration = new BN(new Date().getTime() / 1000 + 3600);
-      const txHash = await processMintingTransaction(provider, expiration);
+      const txHash = await processMintingTransaction(
+        provider,
+        expiration,
+        cycleNumber,
+      );
       if (txHash) {
-        await postTelegramMessage(txHash);
+        // await postTelegramMessage(txHash);
         console.log(`Transaction completed successfully: ${txHash}`);
+        cycleNumber = cycleNumber.add(new BN(1));
       }
     } catch (error) {
       console.error('Scheduled transaction failed:', error);

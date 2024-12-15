@@ -1,13 +1,27 @@
 import mongoose from 'mongoose';
 import express from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
 import Config from './config.js';
 import router from './routes/mintOptions.route.js';
+import healthRouter from './routes/health.route.js';
+import Honeybadger from '@honeybadger-io/js';
 const app = express();
-app.use(cors());
-app.use(helmet());
+Honeybadger.configure({
+    apiKey: Config.HONEYBADGER_API_KEY,
+    environment: 'production'
+});
+app.use(cors({
+    origin: '*',
+    methods: [
+        'GET',
+        'POST'
+    ],
+    allowedHeaders: [
+        '*'
+    ]
+}));
 app.use(express.json());
+app.use(Honeybadger.errorHandler);
 try {
     await mongoose.connect(`${Config.MONGO_URI}`);
     console.log('Connected to mongoose');
@@ -18,6 +32,7 @@ try {
         next();
     });
     app.use('/mint-options', router);
+    app.use('/health', healthRouter);
 } catch (error) {
     console.error('Error connecting to database: ', error);
 } finally{

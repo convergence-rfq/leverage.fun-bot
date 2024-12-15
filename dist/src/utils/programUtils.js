@@ -11,5 +11,16 @@ export async function getProgram(provider) {
         throw error;
     }
 }
+export async function getVaultsProgram(provider) {
+    try {
+        const pid = Config.VAULTS_PROGRAM_ID;
+        const idl = await anchor.Program.fetchIdl(pid, provider);
+        const program = new anchor.Program(idl, provider);
+        return program;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
 
 //# sourceMappingURL=programUtils.js.map
