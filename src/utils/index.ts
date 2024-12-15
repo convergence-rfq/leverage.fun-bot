@@ -56,6 +56,7 @@ export async function getAtaForUser(
   writerMint: PublicKey,
   underlyingMint: PublicKey,
   accountOwner: PublicKey,
+  allowOwnerOffCurve: boolean = false,
 ) {
   try {
     console.log('Getting ATAs');
@@ -63,16 +64,34 @@ export async function getAtaForUser(
     const optionMintAta = getAssociatedTokenAddressSync(
       optionMint,
       accountOwner,
+      allowOwnerOffCurve,
     );
     const writerMintAta = getAssociatedTokenAddressSync(
       writerMint,
       accountOwner,
+      allowOwnerOffCurve,
     );
     const underlyingMintAta = getAssociatedTokenAddressSync(
       underlyingMint,
       accountOwner,
+      allowOwnerOffCurve,
     );
 
+    console.log('optionMint:', optionMint.toBase58());
+    console.log('writerMint:', writerMint.toBase58());
+    console.log('underlyingMint:', underlyingMint.toBase58());
+
+    // Validate that the provided addresses are actually token mints
+    const mintInfos = await connection.getMultipleAccountsInfo([
+      optionMint,
+      writerMint,
+      underlyingMint,
+    ]);
+
+    if (mintInfos.some(info => !info)) {
+      console.error('One or more mint addresses are invalid, trying again...');
+      await sleep(1000);
+    }
     console.log('optionMintAta:', optionMintAta.toBase58());
     console.log('writerMintAta:', writerMintAta.toBase58());
     console.log('underlyingMintAta:', underlyingMintAta.toBase58());
