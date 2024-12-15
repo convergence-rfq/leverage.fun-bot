@@ -55,6 +55,20 @@ class Config {
 
   TESTNET_RPC_URL = 'https://testnet.dev2.eclipsenetwork.xyz';
 
+  SOLANA_DEVNET_RPC_URL = 'https://api.devnet.solana.com';
+
+  SOLANA_DEVNET_ORACLE = new PublicKey(
+    'HjsyECjkjTUX5tz6eKXcdJBGQuf1zYToPnxc4hY8w12f',
+  );
+
+  VAULTS_PROGRAM_ID = new PublicKey(
+    'doVLtcguouVHW5c6odaNrbcHAUEd2fkMGxq28efDptj',
+  );
+
+  AUCTION_PROGRAM_ID = new PublicKey(
+    'BTxfkFZ7bGfse162Tz3hHpd9NxJJxYrFMj63iFmVDs7i',
+  );
+
   jsonToBs58(json: Array<number>) {
     return bs58.encode(json);
   }
