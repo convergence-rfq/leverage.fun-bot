@@ -14,7 +14,7 @@ import {
 import {
   sleep,
   OptionTypeV2,
-  // postTelegramMessage,
+  postTelegramMessage,
   getAtaForUser,
 } from '../utils/index.js';
 import * as anchor from '@coral-xyz/anchor';
@@ -218,9 +218,9 @@ async function processMintingTransaction(
 }
 
 export async function scheduleMintingProcess(provider: anchor.AnchorProvider) {
-  let cycleNumber = new BN(4);
-  console.log('Current cycle number, ', cycleNumber.toString());
+  let cycleNumber = new BN(6);
   cron.schedule('0 0 * * 5', async () => {
+    console.log('Current cycle number, ', cycleNumber.toString());
     try {
       const expiration = new BN(new Date().getTime() / 1000 + 3600);
       const txHash = await processMintingTransaction(
@@ -229,7 +229,7 @@ export async function scheduleMintingProcess(provider: anchor.AnchorProvider) {
         cycleNumber,
       );
       if (txHash) {
-        // await postTelegramMessage(txHash);
+        await postTelegramMessage(txHash);
         console.log(`Transaction completed successfully: ${txHash}`);
         cycleNumber = cycleNumber.add(new BN(1));
       }

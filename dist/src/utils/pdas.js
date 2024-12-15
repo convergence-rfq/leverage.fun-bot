@@ -68,12 +68,19 @@ export function getAuctionProgramVaultPda(auction) {
         auction.toBuffer()
     ], Config.AUCTION_PROGRAM_ID);
 }
-export function getAuctionStatePda(creator) {
+export function getAuctionStatePda(creator, cycleNumber) {
     const textEncoder = new TextEncoder();
     return PublicKey.findProgramAddressSync([
         textEncoder.encode('auction'),
-        creator.toBuffer()
+        creator.toBuffer(),
+        cycleNumber.toArrayLike(Buffer, 'le', 8)
     ], Config.AUCTION_PROGRAM_ID);
+}
+export function getPoolAuthorityVaultsPda() {
+    const textEncoder = new TextEncoder();
+    return PublicKey.findProgramAddressSync([
+        textEncoder.encode('pool_authority')
+    ], Config.VAULTS_PROGRAM_ID);
 }
 
 //# sourceMappingURL=pdas.js.map

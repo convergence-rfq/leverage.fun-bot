@@ -22,5 +22,11 @@ export async function getVaultsProgram(provider) {
         throw error;
     }
 }
+export async function getAuctionProgram(provider) {
+    const pid = Config.AUCTION_PROGRAM_ID;
+    const idl = await anchor.Program.fetchIdl(pid, provider);
+    const program = new anchor.Program(idl, provider);
+    return program;
+}
 
 //# sourceMappingURL=programUtils.js.map
